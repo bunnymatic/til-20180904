@@ -1,49 +1,358 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+    <title>TIL - Aug 2018</title>
 
-		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css">
 
-		<!-- Theme used for syntax highlighting of code -->
-		<link rel="stylesheet" href="lib/css/zenburn.css">
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
 
-		<!-- Printing and PDF exports -->
-		<script>
-			var link = document.createElement( 'link' );
-			link.rel = 'stylesheet';
-			link.type = 'text/css';
-			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
-			document.getElementsByTagName( 'head' )[0].appendChild( link );
-		</script>
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
-		</div>
+    <!-- Printing and PDF exports -->
+    <script>
+     var link = document.createElement( 'link' );
+     link.rel = 'stylesheet';
+     link.type = 'text/css';
+     link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+     document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h1>TIL</h1>
+          <code>til.where(today: "last couple months")</code>
+        </section>
+        <section>
+          <h2>WIkL (what i (kinda) learned)</h2>
+          <ul>
+            <li class="fragment">Google Cloud Ecosystem</li>
+            <li class="fragment">SQL <code>DATE_TRUNC</code></li>
+            <li class="fragment">rdoc <code>sucks</code> (help?)</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Google Cloud Ecosystem</h2>
+        </section>
+        <section>
+          <h3>Google Cloud Ecosystem</h3>
+          <h4>Takeaways</h4>
+          <ul>
+            <li class="fragment">IAM/user management is easy</li>
+            <li class="fragment">Python/Node/Ruby ready</li>
+          </ul>
+        </section>
+        <section>
+          <h3>Google Cloud Ecosystem</h3>
+          <h4>Services</h4>
+          <ul>
+            <li class="fragment">Cloud Storage <=> Amazon S3</li>
+            <li class="fragment">Big Query <=> Athena (or kinda RedShift)</li>
+            <li class="fragment">Cloud Functions <=> Amazon &lambda;</li>
+            <li class="fragment">App Engine <=> ? (heroku?)</li>
+            <li class="fragment">Avro format</li>
+          </ul>
+        </section>
+        <section>
+          <h3>Google Cloud Ecosystem</h3>
+          <h4>Storage (CSV) and Big Query</h4>
 
-		<script src="lib/js/head.min.js"></script>
-		<script src="js/reveal.js"></script>
+          <a href="https://console.cloud.google.com/" target="_blank" >https://console.cloud.google.com/</a>
+        </section>
+        <section>
+          <h3>Google Cloud Ecosystem</h3>
+          <h4>Cloud Functions</h4>
+          <ul>
+            <li class="fragment">runs Python/Node</li>
+            <li class="fragment">easily authenticated</li>
+          </ul>
+        </section>
+        <section>
+          <h3>Google Cloud Ecosystem</h3>
+          <h4>Cloud Functions</h4>
+          <pre>
+            <code>
+from google.cloud import bigquery
 
-		<script>
-			// More info about config & dependencies:
-			// - https://github.com/hakimel/reveal.js#configuration
-			// - https://github.com/hakimel/reveal.js#dependencies
-			Reveal.initialize({
-				dependencies: [
-					{ src: 'plugin/markdown/marked.js' },
-					{ src: 'plugin/markdown/markdown.js' },
-					{ src: 'plugin/notes/notes.js', async: true },
-					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
-				]
-			});
-		</script>
-	</body>
+def run_query_and_dump_to_csv(bucket_name, dataset_id, query, filename):
+    # Instantiates a client
+    client = bigquery.Client()
+
+    events_temp_table_name = 'events_' + str(int(time.time()))
+
+    # Prepares a reference to the new dataset
+    dataset_ref = client.dataset(dataset_id)
+    table_ref = dataset_ref.table(events_temp_table_name)
+    job_config = bigquery.QueryJobConfig()
+    job_config.destination = table_ref
+
+    # run query
+    query_job = client.query(query,location="US", job_config=job_config)
+    query_job.result()
+
+    events_csv_file = 'gs://{}/{}'.format(bucket_name, filename)
+
+    # export table to destination
+    extract_job = client.extract_table(table_ref, events_csv_file, location="US")
+    extract_job.result()
+    print('Exported {}.{} to {}'.format(dataset_id, events_temp_table_name, events_csv_file))
+
+    # dump temp table
+    client.delete_table(table_ref)
+
+    print('Table {}:{} deleted.'.format(dataset_id, events_temp_table_name))
+            </code>
+          </pre>
+        </section>
+
+
+        </section>
+        <section>
+          <h3>Google Cloud Ecosystem</h3>
+          <h4>App Engine</h4>
+          <ul>
+            <li class="fragment">Scheduling</li>
+            <li class="fragment">running Python/Node apps</li>
+          </ul>
+        </section>
+        <section>
+          <h3>Google Cloud Ecosystem</h3>
+          <h4>App Engine as a `heroku scheduler`</h4>
+          <pre>
+            <code>
+# cron.yml
+cron:
+  - description: daily
+    url: /daily
+    schedule: every day 00:00
+            </code>
+          </pre>
+        </section>
+        <section>
+          <h3>Google Cloud Ecosystem</h3>
+          <h4>App Engine as a `heroku scheduler`</h4>
+
+          <pre>
+            <code>
+
+# main.py
+class GenerateEventsReports(webapp2.RequestHandler):
+  def get(self):
+    # ... init variables ...
+    # url to a cloud function
+    url = "https://us-central1-{project}.cloudfunctions.net/generate_events_reports?bucket={bucket}&bq_dataset={dataset}&bq_table={table}".format(project=project, bucket=bucket, dataset=dataset, table=table)
+    print("Fetching url {}".format(url))
+    request = urllib2.Request(url, headers={"cronrequest" : "true"})
+    contents = urllib2.urlopen(request, timeout=300).read()
+
+    app = webapp2.WSGIApplication([('/daily', GenerateEventsReports),], debug=True)
+            </code>
+          </pre>
+        </section>
+        <section>
+          <h3>Google Cloud Ecosystem</h3>
+          <p>Avro format is:
+            <ul>
+              <li class="fragment">CSV with schema up front and binary</li>
+              <li class="fragment">more compact than csv</li>
+              <li class="fragment">Google Big Query's default format</li>
+            </ul>
+          </p>
+        </section>
+        <section>
+          <h3>Google Cloud Ecosystem</h3>
+          <p>Avro format is *not*:
+            <ul>
+              <li class="fragment">compressed</li>
+              <li class="fragment">readable by anything</li>
+            </ul>
+          </p>
+        </section>
+        <section>
+          <h2>SQL <code>DATE_TRUNC</code></h2>
+          <p class="fragment">Thanks, Paul</p>
+        </section>
+        <section>
+          <h3>SQL <code>DATE_TRUNC</code></h3>
+          <h4>Takeaways</h4>
+          <ul>
+            <li class="fragment">Rollups by day</li>
+            <li class="fragment">Rollups by week</li>
+            <li class="fragment">Rollups by month</li>
+            <li class="fragment">
+              <span class="fragment highlight-red">so easy...</span>
+            </li>
+            <li class="fragment">Not available on MySQL :(</li>
+          </ul>
+        </section>
+        <section>
+          <h3>SQL <code>DATE_TRUNC by hour</code></h3>
+          <pre>
+            <code>
+psql> SELECT count(*), DATE_TRUNC('hour',created_at) as ts
+      FROM accounts group by ts limit(5);
+ count |         ts
+-------+---------------------
+     2 | 2011-06-13 05:00:00
+     1 | 2017-04-08 02:00:00
+     1 | 2011-08-02 03:00:00
+     9 | 2011-02-24 00:00:00
+     1 | 2009-10-13 22:00:00
+(5 rows)
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>SQL <code>DATE_TRUNC by day</code></h3>
+          <pre>
+            <code>
+psql> SELECT count(*), DATE_TRUNC('day',created_at) as ts
+      FROM accounts group by ts limit(5);
+ count |         ts
+-------+---------------------
+   121 | 2011-02-24 00:00:00
+     8 | 2014-07-26 00:00:00
+    10 | 2015-12-02 00:00:00
+     3 | 2015-12-05 00:00:00
+    24 | 2009-09-29 00:00:00
+(5 rows)
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>SQL <code>DATE_TRUNC by week</code></h3>
+          <pre>
+            <code>
+psql> SELECT count(*), DATE_TRUNC('week',created_at) as ts
+      FROM accounts group by ts  limit(5);
+ count |         ts
+-------+---------------------
+   126 | 2013-07-29 00:00:00
+   656 | 2010-09-20 00:00:00
+   215 | 2013-11-11 00:00:00
+   169 | 2017-08-28 00:00:00
+    97 | 2014-05-05 00:00:00
+(5 rows)
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>SQL <code>DATE_TRUNC by year</code></h3>
+          <pre>
+            <code>
+psql> SELECT count(*), DATE_TRUNC('year',created_at) as ts
+      FROM accounts group by ts;
+ count |         ts
+-------+---------------------
+  3438 | 2015-01-01 00:00:00
+  6371 | 2014-01-01 00:00:00
+ 12155 | 2017-01-01 00:00:00
+ 31868 | 2010-01-01 00:00:00
+ 11450 | 2018-01-01 00:00:00
+ 11246 | 2009-01-01 00:00:00
+ 41535 | 2011-01-01 00:00:00
+  3467 | 2016-01-01 00:00:00
+  8356 | 2013-01-01 00:00:00
+ 27888 | 2012-01-01 00:00:00
+(10 rows)
+            </code>
+          </pre>
+        </section>
+        <section>
+          <h2>rdoc (with rubocop) <code>sucks</code></h2>
+          <note>Looking for help here</note>
+        </section>
+        <section>
+          <h3>rdoc (with rubocop) <code>sucks</code></h3>
+          <pre>
+            <code>
+class DifferentThing
+
+  # Initialize the object
+  #
+  # thing:: [Thing] This is a thing that needs a really long description because it's so compilcated that we have to 'splain what this thing does
+  # returns:: [DifferentThing]
+  def initialize(thing)
+    @thing = thing
+  end
+
+  ...
+end
+            </code>
+          </pre>
+          <p>Looks fine to me...</p>
+        </section>
+        <section>
+          <h3>rdoc (with rubocop) <code>sucks</code></h3>
+          <pre>
+            <code>
+% rubocop app/services/thing_service.rb
+
+Offenses:
+
+app/services/some_service.rb:6:121: C: Metrics/LineLength: Line is too long. [145/120]
+  # thing:: [Thing] This is a thing that needs a really long description because it's so compilcated that we have to 'splain what this thing does
+            </code>
+          </pre>
+          <div>but <code>rdoc</code> says...</div>
+        </section>
+        <section>
+          <h3>rdoc (with rubocop) <code>works</code></h3>
+          <pre>
+            <code>
+% rdoc app/services
+% open doc/index.html
+            </code>
+          </pre>
+        </section>
+        <section>
+          <h3>rdoc (with rubocop) <code>works</code></h3>
+          <div>
+            <img src="rdoc_different_thing.png"/>
+          </div>
+        </section>
+        <section>
+          <h3>rdoc (with rubocop) <code>sucks</code></h3>
+          <div>
+            <h1>¯\_(ツ)_/¯</h1>
+            <p class="fragment">what to do...</p>
+            <p class="fragment">
+              <span class="fragment highlight-blue">any advice?</span>
+            </p>
+          </div>
+        </section>
+        <section>
+          <h2>The End</code></h2>
+          <div>
+            <h1>¯\_(ツ)_/¯</h1>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+     // More info about config & dependencies:
+     // - https://github.com/hakimel/reveal.js#configuration
+     // - https://github.com/hakimel/reveal.js#dependencies
+     Reveal.initialize({
+       dependencies: [
+         { src: 'plugin/markdown/marked.js' },
+         { src: 'plugin/markdown/markdown.js' },
+         { src: 'plugin/notes/notes.js', async: true },
+         { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+       ]
+     });
+    </script>
+  </body>
 </html>

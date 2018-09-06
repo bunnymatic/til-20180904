@@ -33,7 +33,6 @@
           <ul>
             <li class="fragment">Google Cloud Ecosystem</li>
             <li class="fragment">SQL <code>DATE_TRUNC</code></li>
-            <li class="fragment">rdoc <code>sucks</code> (help?)</li>
           </ul>
         </section>
         <section>
@@ -267,73 +266,7 @@ psql> SELECT count(*), DATE_TRUNC('year',created_at) as ts
           </pre>
         </section>
         <section>
-          <h2>rdoc (with rubocop) <code>sucks</code></h2>
-          <note>Looking for help here</note>
-        </section>
-        <section>
-          <h3>rdoc (with rubocop) <code>sucks</code></h3>
-          <pre>
-            <code>
-class DifferentThing
-
-  # Initialize the object
-  #
-  # thing:: [Thing] This is a thing that needs a really long description because it's so compilcated that we have to 'splain what this thing does
-  # returns:: [DifferentThing]
-  def initialize(thing)
-    @thing = thing
-  end
-
-  ...
-end
-            </code>
-          </pre>
-          <p>Looks fine to me...</p>
-        </section>
-        <section>
-          <h3>rdoc (with rubocop) <code>sucks</code></h3>
-          <pre>
-            <code>
-% rubocop app/services/thing_service.rb
-
-Offenses:
-
-app/services/some_service.rb:6:121: C: Metrics/LineLength: Line is too long. [145/120]
-  # thing:: [Thing] This is a thing that needs a really long description because it's so compilcated that we have to 'splain what this thing does
-            </code>
-          </pre>
-          <div>but <code>rdoc</code> says...</div>
-        </section>
-        <section>
-          <h3>rdoc (with rubocop) <code>works</code></h3>
-          <pre>
-            <code>
-% rdoc app/services
-% open doc/index.html
-            </code>
-          </pre>
-        </section>
-        <section>
-          <h3>rdoc (with rubocop) <code>works</code></h3>
-          <div>
-            <img src="rdoc_different_thing.png"/>
-          </div>
-        </section>
-        <section>
-          <h3>rdoc (with rubocop) <code>sucks</code></h3>
-          <div>
-            <h1>¯\_(ツ)_/¯</h1>
-            <p class="fragment">what to do...</p>
-            <p class="fragment">
-              <span class="fragment highlight-blue">any advice?</span>
-            </p>
-          </div>
-        </section>
-        <section>
-          <h2>The End</code></h2>
-          <div>
-            <h1>¯\_(ツ)_/¯</h1>
-          </div>
+          <h2><span class="fragement" >The</span>  <span class="fragement" >End</span></h2>
         </section>
       </div>
     </div>
